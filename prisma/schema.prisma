@@ -37,6 +37,7 @@ model User {
   sentMessages       Message[]            @relation("UserMessages")
   paymentForm        PaymentForm?
   pitch              Pitch[]
+  notifications      Notification[]
   seenMessages       SeenMessage[]
   shortlisted        ShortListedCreator[]
   submission         Submission[]
@@ -47,6 +48,8 @@ model User {
   UserThread         UserThread[]
   threads            Thread[]             @relation("UserThreads")
   resetPasswordToken ResetPasswordToken?
+  // Notification       Notification[]
+  // creatorNotification Notification[]       @relation("creator")
 }
 
 model ResetPasswordToken {
@@ -89,24 +92,26 @@ model Permisions {
 }
 
 model Creator {
-  id              String      @id @unique @default(cuid())
-  pronounce       String?     @db.VarChar(100)
-  address         String?
-  state           String?
-  location        String?
-  birthDate       DateTime?
-  instagram       String?     @db.VarChar(100)
-  tiktok          String?     @db.VarChar(100)
-  employment      Employment? @default(others)
-  languages       Json?
-  userId          String      @unique
-  socialMediaData Json?
-  isFormCompleted Boolean?
-  user            User        @relation(fields: [userId], references: [id])
-  industries      Industry[]
-  interests       Interest[]
-  invoices        Invoice[]
-  mediaKit        MediaKit?
+  id                     String      @id @unique @default(cuid())
+  pronounce              String?     @db.VarChar(100)
+  address                String?
+  state                  String?
+  location               String?
+  birthDate              DateTime?
+  instagram              String?     @db.VarChar(100)
+  tiktok                 String?     @db.VarChar(100)
+  socialMediaUpdateCount Json?
+  allowToChange          Boolean     @default(false)
+  employment             Employment? @default(others)
+  languages              Json?
+  userId                 String      @unique
+  socialMediaData        Json?
+  isFormCompleted        Boolean?
+  user                   User        @relation(fields: [userId], references: [id])
+  industries             Industry[]
+  interests              Interest[]
+  invoices               Invoice[]
+  mediaKit               MediaKit?
 }
 
 model MediaKit {
@@ -537,12 +542,17 @@ model Notification {
   createdAt        DateTime           @default(now())
   entity           Entity?
   campaignId       String?
+  creatorId        String?
   pitchId          String?
   submissionId     String?
   campaign         Campaign?          @relation(fields: [campaignId], references: [id])
   pitch            Pitch?             @relation(fields: [pitchId], references: [id])
+  // creator          User?              @relation("creator", fields: [creatorId], references: [id])
   submission       Submission?        @relation(fields: [submissionId], references: [id])
   userNotification UserNotification[]
+
+  User   User?   @relation(fields: [userId], references: [id])
+  userId String?
 }
 
 model UserNotification {
@@ -913,6 +923,7 @@ enum Priority {
 
 enum Entity {
   Campaign
+  Live
   User
   Pitch
   Shortlist
